@@ -201,10 +201,7 @@ function getAlgorithmData(resultLog: ResultLog): AlgorithmDataRow[] {
   const rows: AlgorithmDataRow[] = [];
   let nextSandboxLogs = '';
 
-
-
   for (const lg of resultLog.logs) {
-
     // nextSandboxLogs = lg.sandboxLog.trim()
     //
     // if (nextSandboxLogs.startsWith('Conversion request')) {

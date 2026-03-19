@@ -2,7 +2,7 @@ export interface ResultLog {
   submissionId: string;
   activitiesLog: string;
   logs: ResultLogItems[];
-  tradeHistory:ResultLogTradeHistoryItem[]
+  tradeHistory: ResultLogTradeHistoryItem[];
 }
 
 export interface ResultLogItems {
