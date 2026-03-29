@@ -64,11 +64,11 @@ export function TimestampDetail({
       {Object.keys(state.orderDepths).length % 3 <= 2 && <Grid.Col span={{ xs: 12, sm: 4 }} />}
       {Object.keys(state.orderDepths).length % 3 <= 1 && <Grid.Col span={{ xs: 12, sm: 4 }} />}
       <Grid.Col span={{ xs: 12, sm: 4 }}>
-        <Title order={5}>Own trades</Title>
+        <Title order={5}>Most Recent Own trades</Title>
         {<TradesTable trades={state.ownTrades} />}
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
-        <Title order={5}>Market trades</Title>
+        <Title order={5}>Most Recent Market trades</Title>
         {<TradesTable trades={state.marketTrades} />}
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
