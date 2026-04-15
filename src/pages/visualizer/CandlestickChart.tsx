@@ -37,6 +37,8 @@ export function CandlestickChart({ symbol }: CandlestickChartProps): ReactNode {
   let series: Highcharts.SeriesOptionsType[] = [];
   let title = '';
 
+  const isValidPrice = (p: number): boolean => p !== 0 && !isNaN(p);
+
   if (viewMode === 'movement') {
     title = `${symbol} - Price Movement`;
     const candleData: [number, number, number, number, number][] = [];
@@ -49,15 +51,19 @@ export function CandlestickChart({ symbol }: CandlestickChartProps): ReactNode {
       const open = group[0].midPrice;
       const close = group[group.length - 1].midPrice;
 
+      if (!isValidPrice(open) || !isValidPrice(close)) continue;
+
       let high = -Infinity;
       let low = Infinity;
 
       for (const row of group) {
-        if (row.askPrices.length > 0) high = Math.max(high, row.askPrices[0]);
-        high = Math.max(high, row.midPrice);
-        if (row.bidPrices.length > 0) low = Math.min(low, row.bidPrices[0]);
-        low = Math.min(low, row.midPrice);
+        if (row.askPrices.length > 0 && isValidPrice(row.askPrices[0])) high = Math.max(high, row.askPrices[0]);
+        if (isValidPrice(row.midPrice)) high = Math.max(high, row.midPrice);
+        if (row.bidPrices.length > 0 && isValidPrice(row.bidPrices[0])) low = Math.min(low, row.bidPrices[0]);
+        if (isValidPrice(row.midPrice)) low = Math.min(low, row.midPrice);
       }
+
+      if (high === -Infinity || low === Infinity) continue;
 
       candleData.push([timestamp, open, high, low, close]);
     }
@@ -88,11 +94,11 @@ export function CandlestickChart({ symbol }: CandlestickChartProps): ReactNode {
 
     for (const row of rows) {
       for (let i = 0; i < row.bidPrices.length; i++) {
-        (priceSeries[2 - i] as any).data.push([row.timestamp, row.bidPrices[i]]);
+        if (isValidPrice(row.bidPrices[i])) (priceSeries[2 - i] as any).data.push([row.timestamp, row.bidPrices[i]]);
       }
-      (priceSeries[3] as any).data.push([row.timestamp, row.midPrice]);
+      if (isValidPrice(row.midPrice)) (priceSeries[3] as any).data.push([row.timestamp, row.midPrice]);
       for (let i = 0; i < row.askPrices.length; i++) {
-        (priceSeries[i + 4] as any).data.push([row.timestamp, row.askPrices[i]]);
+        if (isValidPrice(row.askPrices[i])) (priceSeries[i + 4] as any).data.push([row.timestamp, row.askPrices[i]]);
       }
     }
 

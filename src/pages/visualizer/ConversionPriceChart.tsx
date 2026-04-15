@@ -15,14 +15,16 @@ export function ConversionPriceChart({ symbol }: ConversionPriceChartProps): Rea
   const bidPriceData = [];
   const askPriceData = [];
 
+  const isValidPrice = (p: number): boolean => p !== 0 && !isNaN(p);
+
   for (const row of algorithm.data) {
     const observation = row.state.observations.conversionObservations[symbol];
     if (observation === undefined) {
       continue;
     }
 
-    bidPriceData.push([row.state.timestamp, observation.bidPrice]);
-    askPriceData.push([row.state.timestamp, observation.askPrice]);
+    if (isValidPrice(observation.bidPrice)) bidPriceData.push([row.state.timestamp, observation.bidPrice]);
+    if (isValidPrice(observation.askPrice)) askPriceData.push([row.state.timestamp, observation.askPrice]);
   }
 
   const options: Highcharts.Options = {

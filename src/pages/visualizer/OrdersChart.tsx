@@ -22,17 +22,19 @@ export function OrdersChart({ symbol }: OrdersChartProps): ReactNode {
   const ask2Data: [number, number][] = [];
   const ask3Data: [number, number][] = [];
 
+  const isValidPrice = (p: number): boolean => p !== 0 && !isNaN(p);
+
   for (const row of algorithm.activityLogs) {
     if (row.product !== symbol) continue;
 
-    midPriceData.push([row.timestamp, row.midPrice]);
+    if (isValidPrice(row.midPrice)) midPriceData.push([row.timestamp, row.midPrice]);
 
-    if (row.bidPrices.length >= 1) bid1Data.push([row.timestamp, row.bidPrices[0]]);
-    if (row.bidPrices.length >= 2) bid2Data.push([row.timestamp, row.bidPrices[1]]);
-    if (row.bidPrices.length >= 3) bid3Data.push([row.timestamp, row.bidPrices[2]]);
-    if (row.askPrices.length >= 1) ask1Data.push([row.timestamp, row.askPrices[0]]);
-    if (row.askPrices.length >= 2) ask2Data.push([row.timestamp, row.askPrices[1]]);
-    if (row.askPrices.length >= 3) ask3Data.push([row.timestamp, row.askPrices[2]]);
+    if (row.bidPrices.length >= 1 && isValidPrice(row.bidPrices[0])) bid1Data.push([row.timestamp, row.bidPrices[0]]);
+    if (row.bidPrices.length >= 2 && isValidPrice(row.bidPrices[1])) bid2Data.push([row.timestamp, row.bidPrices[1]]);
+    if (row.bidPrices.length >= 3 && isValidPrice(row.bidPrices[2])) bid3Data.push([row.timestamp, row.bidPrices[2]]);
+    if (row.askPrices.length >= 1 && isValidPrice(row.askPrices[0])) ask1Data.push([row.timestamp, row.askPrices[0]]);
+    if (row.askPrices.length >= 2 && isValidPrice(row.askPrices[1])) ask2Data.push([row.timestamp, row.askPrices[1]]);
+    if (row.askPrices.length >= 3 && isValidPrice(row.askPrices[2])) ask3Data.push([row.timestamp, row.askPrices[2]]);
   }
 
   const filledBuyData: Highcharts.PointOptionsObject[] = [];
@@ -41,6 +43,7 @@ export function OrdersChart({ symbol }: OrdersChartProps): ReactNode {
 
   for (const trade of algorithm.tradeHistory) {
     if (trade.symbol !== symbol) continue;
+    if (!isValidPrice(trade.price)) continue;
 
     const point: Highcharts.PointOptionsObject = {
       x: trade.timestamp,
@@ -65,6 +68,8 @@ export function OrdersChart({ symbol }: OrdersChartProps): ReactNode {
     if (!orders) continue;
 
     for (const order of orders) {
+      if (!isValidPrice(order.price)) continue;
+
       const point: Highcharts.PointOptionsObject = {
         x: row.state.timestamp,
         y: order.price,
