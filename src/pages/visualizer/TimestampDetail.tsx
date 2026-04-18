@@ -23,15 +23,34 @@ function formatTraderData(value: any): string {
 
 export interface TimestampDetailProps {
   row: AlgorithmDataRow;
+  selectedProduct?: string;
 }
 
 export function TimestampDetail({
   row: { state, orders, conversions, traderData, algorithmLogs, sandboxLogs },
+  selectedProduct = 'all',
 }: TimestampDetailProps): ReactNode {
   const algorithm = useStore(state => state.algorithm)!;
 
+  function filterByKey<T>(record: Record<string, T>): Record<string, T> {
+    if (selectedProduct === 'all') return record;
+    return Object.fromEntries(Object.entries(record).filter(([key]) => key === selectedProduct));
+  }
+
+  const filteredListings = filterByKey(state.listings);
+  const filteredPosition = filterByKey(state.position);
+  const filteredOrderDepths = filterByKey(state.orderDepths);
+  const filteredOwnTrades = filterByKey(state.ownTrades);
+  const filteredMarketTrades = filterByKey(state.marketTrades);
+  const filteredOrders = filterByKey(orders);
+  const filteredPlainValueObservations = filterByKey(state.observations.plainValueObservations);
+  const filteredConversionObservations = filterByKey(state.observations.conversionObservations);
+
   const profitLoss = algorithm.activityLogs
-    .filter(row => row.timestamp === state.timestamp)
+    .filter(
+      row =>
+        row.timestamp === state.timestamp && (selectedProduct === 'all' || row.product === selectedProduct),
+    )
     .reduce((acc, val) => acc + val.profitLoss, 0);
 
   return (
@@ -45,43 +64,43 @@ export function TimestampDetail({
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Listings</Title>
-        <ListingsTable listings={state.listings} />
+        <ListingsTable listings={filteredListings} />
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Positions</Title>
-        <PositionTable position={state.position} />
+        <PositionTable position={filteredPosition} />
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Profit / Loss</Title>
-        <ProfitLossTable timestamp={state.timestamp} />
+        <ProfitLossTable timestamp={state.timestamp} product={selectedProduct === 'all' ? undefined : selectedProduct} />
       </Grid.Col>
-      {Object.entries(state.orderDepths).map(([symbol, orderDepth], i) => (
+      {Object.entries(filteredOrderDepths).map(([symbol, orderDepth], i) => (
         <Grid.Col key={i} span={{ xs: 12, sm: 4 }}>
           <Title order={5}>{symbol} order depth</Title>
           <OrderDepthTable orderDepth={orderDepth} />
         </Grid.Col>
       ))}
-      {Object.keys(state.orderDepths).length % 3 <= 2 && <Grid.Col span={{ xs: 12, sm: 4 }} />}
-      {Object.keys(state.orderDepths).length % 3 <= 1 && <Grid.Col span={{ xs: 12, sm: 4 }} />}
+      {Object.keys(filteredOrderDepths).length % 3 <= 2 && <Grid.Col span={{ xs: 12, sm: 4 }} />}
+      {Object.keys(filteredOrderDepths).length % 3 <= 1 && <Grid.Col span={{ xs: 12, sm: 4 }} />}
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Most Recent Own trades</Title>
-        {<TradesTable trades={state.ownTrades} />}
+        {<TradesTable trades={filteredOwnTrades} />}
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Most Recent Market trades</Title>
-        {<TradesTable trades={state.marketTrades} />}
+        {<TradesTable trades={filteredMarketTrades} />}
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Orders</Title>
-        {<OrdersTable orders={orders} />}
+        {<OrdersTable orders={filteredOrders} />}
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 4 }}>
         <Title order={5}>Plain value observations</Title>
-        <PlainValueObservationsTable plainValueObservations={state.observations.plainValueObservations} />
+        <PlainValueObservationsTable plainValueObservations={filteredPlainValueObservations} />
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 8 }}>
         <Title order={5}>Conversion observations</Title>
-        <ConversionObservationsTable conversionObservations={state.observations.conversionObservations} />
+        <ConversionObservationsTable conversionObservations={filteredConversionObservations} />
       </Grid.Col>
       <Grid.Col span={{ xs: 12, sm: 6 }}>
         <Title order={5}>Sandbox logs</Title>

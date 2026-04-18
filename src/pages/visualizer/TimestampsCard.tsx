@@ -1,4 +1,4 @@
-import { Group, NumberInput, Slider, SliderProps, Text, Title } from '@mantine/core';
+import { Group, NumberInput, Select, Slider, SliderProps, Text, Title } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import { KeyboardEvent, ReactNode, useEffect, useState } from 'react';
 import { AlgorithmDataRow } from '../../models.ts';
@@ -23,8 +23,14 @@ export function TimestampsCard(): ReactNode {
   // const timestampMax = 1999900;
   // const timestampStep = 100;
 
+  const products = Array.from(
+    new Set(algorithm.data.flatMap(row => Object.keys(row.state.orderDepths))),
+  ).sort();
+  const productSelectData = [{ value: 'all', label: 'All Products' }, ...products.map(p => ({ value: p, label: p }))];
+
   const [timestamp, setTimestamp] = useState(timestampMin);
   const [inputValue, setInputValue] = useState<number | string>(timestampMin);
+  const [selectedProduct, setSelectedProduct] = useState<string>('all');
 
   useEffect(() => {
     setInputValue(timestamp);
@@ -81,6 +87,13 @@ export function TimestampsCard(): ReactNode {
           style={{ width: 150 }}
           styles={{ input: { fontWeight: 700, fontSize: 'var(--mantine-font-size-sm)' } }}
         />
+        <Select
+          value={selectedProduct}
+          onChange={value => setSelectedProduct(value ?? 'all')}
+          data={productSelectData}
+          style={{ width: 180 }}
+          styles={{ input: { fontWeight: 600, fontSize: 'var(--mantine-font-size-sm)' } }}
+        />
       </Group>
 
       <Slider
@@ -95,7 +108,7 @@ export function TimestampsCard(): ReactNode {
       />
 
       {rowsByTimestamp[timestamp] ? (
-        <TimestampDetail row={rowsByTimestamp[timestamp]} />
+        <TimestampDetail row={rowsByTimestamp[timestamp]} selectedProduct={selectedProduct} />
       ) : (
         <Text>No logs found for timestamp {formatNumber(timestamp)}</Text>
       )}
